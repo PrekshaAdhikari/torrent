@@ -22,9 +22,12 @@ def Home(request):
         try:
             response = session.get(f'https://www.limetorrents.info/search/all/{keyword}/seeds/1/')
             soup = BeautifulSoup(response.content, "lxml")
-            pages = soup.find("div", {"class":"search_stat"})
-            total = pages.findAll("a")[-2]
-            total_pages = int(total.text) 
+            try:
+                pages = soup.find("div", {"class":"search_stat"})
+                total = pages.findAll("a")[-2]
+                total_pages = int(total.text) 
+            except:
+                total_pages = 1
             print(total_pages)
             for x in range(1, total_pages + 1):
                 all_url = "https://www.limetorrents.info/search/all/{}/seeds/{}/".format(keyword,x)
@@ -44,8 +47,9 @@ def Home(request):
                     soup2 = BeautifulSoup(response2.content, "lxml") 
                     link_div = soup2.find("div", {"class":"downloadarea"})
                     link_ = link_div.find("a")
-                    link = link_["href"]
-                    print(link)
+                    link = link_["href"].split("?")[0]
+                    link_name = link.split("/")[-1]
+                    #print(link)
                     try:
                         r = requests.get(link)
                     except Exception:
@@ -57,9 +61,10 @@ def Home(request):
                         os.mkdir(dirName)
                     else:    
                       pass
-                    folder = "{}/{}".format(dirName,Href)
+                    file_name = "{}/{}".format(dirName,link_name )
 
-                    open(folder, 'wb').write(r.content)
+
+                    open(file_name, 'wb').write(r.content)
 
             context["status"] ="Download Sucessful."
 
@@ -68,8 +73,6 @@ def Home(request):
             context["status"] ="No file to download."
 
         print(context)
-
-
 
 
     return render(request,"home.html",{'context': context})
