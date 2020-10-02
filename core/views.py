@@ -63,7 +63,8 @@ def Home(request):
 
             context["status"] ="Download Sucessful."
 
-        except:
+        except Exception as ex:
+            print(ex)
             context["status"] ="No file to download."
 
         print(context)
